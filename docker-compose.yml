@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: auth-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - auth-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auth-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      # Adicione outras variáveis de ambiente do Spring Boot aqui, como JWT_SECRET
+      JWT_SECRET: your_jwt_secret_key_replace_me_with_a_strong_one
+    depends_on:
+      - db
+    networks:
+      - auth-network
+
+  frontend:
+    build:
+      context: ./auth-frontend
+      dockerfile: Dockerfile
+    container_name: auth-frontend
+    ports:
+      - "3000:80" # Mapeia a porta 80 do contêiner para a porta 3000 do host
+    depends_on:
+      - backend # O frontend depende do backend para fazer chamadas de API
+    networks:
+      - auth-network
+
+volumes:
+  db_data:
+
+networks:
+  auth-network:
+    driver: bridge

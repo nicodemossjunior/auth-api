@@ -1,0 +1,21 @@
+# Backend
+auth-backend/target/
+
+# Frontend
+auth-frontend/node_modules/
+
+# Environment
+.env
+
+# IDE and OS files
+.idea/
+*.iml
+*~
+*.swp
+.DS_Store
+
+# Logs
+*.log
+
+# Conversation history
+conversation_history.md
