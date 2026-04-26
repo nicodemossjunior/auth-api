@@ -24,22 +24,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/auth_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: password
-      # Adicione outras variáveis de ambiente do Spring Boot aqui, como JWT_SECRET
       JWT_SECRET: mySecretKey123456789012345678901234567890
     depends_on:
       - db
-    networks:
-      - auth-network
-
-  frontend:
-    build:
-      context: ./auth-frontend
-      dockerfile: Dockerfile
-    container_name: auth-frontend
-    ports:
-      - "3000:80" # Mapeia a porta 80 do contêiner para a porta 3000 do host
-    depends_on:
-      - backend # O frontend depende do backend para fazer chamadas de API
     networks:
       - auth-network
 
