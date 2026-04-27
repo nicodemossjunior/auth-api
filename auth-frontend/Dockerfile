@@ -3,15 +3,15 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy package.json and yarn.lock to leverage Docker cache
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+# Copy package.json and package-lock.json to leverage Docker cache
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # Copy the rest of the application code
 COPY . .
 
 # Build the React application (Vite builds to 'dist' by default)
-RUN yarn build
+RUN npm run build
 
 # Stage 2: Serve the React application with Nginx
 FROM nginx:alpine

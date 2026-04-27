@@ -13,6 +13,7 @@ auth-frontend/node_modules/
 *~
 *.swp
 .DS_Store
+.vscode/
 
 # Logs
 *.log
