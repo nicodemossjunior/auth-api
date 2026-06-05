@@ -1,4 +1,4 @@
-/* CSS moderno e agradável */
+/* Modern application styles */
 :root {
   --primary-color: #3b82f6;
   --primary-hover: #2563eb;
@@ -47,7 +47,7 @@ body {
   min-height: 100vh;
 }
 
-/* Componentes base */
+/* Base components */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -64,7 +64,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Botões */
+/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -172,7 +172,7 @@ body {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
-/* Formulários */
+/* Forms */
 .form-group {
   margin-bottom: 1.5rem;
 }
@@ -199,7 +199,7 @@ body {
   gap: 0.25rem;
 }
 
-/* Alertas */
+/* Alerts */
 .alert {
   padding: 1rem;
   border-radius: var(--radius-md);
@@ -310,7 +310,7 @@ body {
   }
 }
 
-/* Animações */
+/* Animations */
 .fade-in {
   animation: fadeIn 0.3s ease-in-out;
 }

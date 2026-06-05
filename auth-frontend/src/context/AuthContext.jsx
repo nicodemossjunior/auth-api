@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Falha no login');
+        throw new Error(data.message || 'Login failed');
       }
 
       localStorage.setItem('token', data.token);
@@ -132,7 +132,7 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Falha no registro');
+        throw new Error(data.message || 'Registration failed');
       }
 
       localStorage.setItem('token', data.token);

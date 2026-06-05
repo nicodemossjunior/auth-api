@@ -34,7 +34,7 @@ const Button = ({
       {loading ? (
         <span className="loading">
           <span className="spinner"></span>
-          Carregando...
+          Loading...
         </span>
       ) : (
         children

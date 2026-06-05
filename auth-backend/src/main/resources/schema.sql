@@ -1,10 +1,10 @@
--- Criar banco de dados se não existir
+-- Create the database if it does not exist.
 -- CREATE DATABASE IF NOT EXISTS auth_db;
 
--- Usar o banco de dados
+-- Use the database.
 -- \c auth_db;
 
--- Tabela de usuários
+-- Users table.
 CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
@@ -14,13 +14,13 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Tabela de papéis (roles)
+-- Roles table.
 CREATE TABLE IF NOT EXISTS roles (
     id INTEGER PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
--- Tabela de junção entre usuários e papéis
+-- User-role join table.
 CREATE TABLE IF NOT EXISTS user_roles (
     user_id BIGINT NOT NULL,
     role_id INTEGER NOT NULL,
@@ -29,19 +29,19 @@ CREATE TABLE IF NOT EXISTS user_roles (
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 
--- Inserir papéis padrão
+-- Insert default roles.
 INSERT INTO roles (id, name) VALUES 
 (1, 'ROLE_USER'),
 (2, 'ROLE_ADMIN')
 ON CONFLICT (id) DO NOTHING;
 
--- Inserir um usuário admin padrão (senha: admin123)
--- A senha será hasheada pela aplicação, então aqui é apenas um placeholder
+-- Insert a default admin user (password: admin123).
+-- The application hashes passwords, so this is only a placeholder.
 INSERT INTO users (first_name, last_name, email, password) VALUES 
 ('Admin', 'User', 'admin@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi')
 ON CONFLICT (email) DO NOTHING;
 
--- Associar o usuário admin ao papel ROLE_ADMIN
+-- Assign the admin user to ROLE_ADMIN.
 INSERT INTO user_roles (user_id, role_id) 
 SELECT u.id, r.id 
 FROM users u, roles r 

@@ -33,15 +33,15 @@ const LoginPage = () => {
     const newErrors = {};
     
     if (!formData.email) {
-      newErrors.email = 'Email é obrigatório';
+      newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email inválido';
+      newErrors.email = 'Invalid email';
     }
     
     if (!formData.password) {
-      newErrors.password = 'Senha é obrigatória';
+      newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Senha deve ter pelo menos 6 caracteres';
+      newErrors.password = 'Password must be at least 6 characters';
     }
     
     return newErrors;
@@ -70,10 +70,10 @@ const LoginPage = () => {
         <div className="card">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white mb-2">
-              Bem-vindo de volta
+              Welcome back
             </h2>
             <p className="text-white/80">
-              Entre com suas credenciais para acessar sua conta
+              Sign in with your credentials to access your account
             </p>
           </div>
           
@@ -84,19 +84,19 @@ const LoginPage = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="seu@email.com"
+              placeholder="you@example.com"
               error={errors.email}
               required
               autoComplete="email"
             />
             
             <Input
-              label="Senha"
+              label="Password"
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="•••••••••"
+              placeholder="*********"
               error={errors.password}
               required
               autoComplete="current-password"
@@ -126,18 +126,18 @@ const LoginPage = () => {
               disabled={loading}
               className="btn-full"
             >
-              Entrar
+              Sign in
             </Button>
           </form>
           
           <div className="text-center mt-6">
             <p className="text-white/80 text-sm">
-              Não tem uma conta?{' '}
+              Do not have an account?{' '}
               <Link 
                 to="/register" 
                 className="text-white hover:text-white font-medium transition-colors"
               >
-                Crie uma agora
+                Create one now
               </Link>
             </p>
           </div>

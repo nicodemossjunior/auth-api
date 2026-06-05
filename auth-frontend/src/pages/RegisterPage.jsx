@@ -36,33 +36,33 @@ const RegisterPage = () => {
     const newErrors = {};
     
     if (!formData.firstName) {
-      newErrors.firstName = 'Nome é obrigatório';
+      newErrors.firstName = 'First name is required';
     } else if (formData.firstName.length < 2) {
-      newErrors.firstName = 'Nome deve ter pelo menos 2 caracteres';
+      newErrors.firstName = 'First name must be at least 2 characters';
     }
     
     if (!formData.lastName) {
-      newErrors.lastName = 'Sobrenome é obrigatório';
+      newErrors.lastName = 'Last name is required';
     } else if (formData.lastName.length < 2) {
-      newErrors.lastName = 'Sobrenome deve ter pelo menos 2 caracteres';
+      newErrors.lastName = 'Last name must be at least 2 characters';
     }
     
     if (!formData.email) {
-      newErrors.email = 'Email é obrigatório';
+      newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email inválido';
+      newErrors.email = 'Invalid email';
     }
     
     if (!formData.password) {
-      newErrors.password = 'Senha é obrigatória';
+      newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Senha deve ter pelo menos 6 caracteres';
+      newErrors.password = 'Password must be at least 6 characters';
     }
     
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Confirmação de senha é obrigatória';
+      newErrors.confirmPassword = 'Password confirmation is required';
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Senhas não coincidem';
+      newErrors.confirmPassword = 'Passwords do not match';
     }
     
     return newErrors;
@@ -96,34 +96,34 @@ const RegisterPage = () => {
         <div className="card">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white mb-2">
-              Criar nova conta
+              Create a new account
             </h2>
             <p className="text-white/80">
-              Junte-se a nós hoje mesmo
+              Join us today
             </p>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <Input
-                label="Nome"
+                label="First name"
                 type="text"
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                placeholder="João"
+                placeholder="John"
                 error={errors.firstName}
                 required
                 autoComplete="given-name"
               />
               
               <Input
-                label="Sobrenome"
+                label="Last name"
                 type="text"
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                placeholder="Silva"
+                placeholder="Smith"
                 error={errors.lastName}
                 required
                 autoComplete="family-name"
@@ -136,31 +136,31 @@ const RegisterPage = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="seu@email.com"
+              placeholder="you@example.com"
               error={errors.email}
               required
               autoComplete="email"
             />
             
             <Input
-              label="Senha"
+              label="Password"
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="••••••••"
+              placeholder="********"
               error={errors.password}
               required
               autoComplete="new-password"
             />
             
             <Input
-              label="Confirmar Senha"
+              label="Confirm password"
               type="password"
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              placeholder="••••••••"
+              placeholder="********"
               error={errors.confirmPassword}
               required
               autoComplete="new-password"
@@ -190,18 +190,18 @@ const RegisterPage = () => {
               disabled={loading}
               className="btn-full"
             >
-              Criar Conta
+              Create Account
             </Button>
           </form>
           
           <div className="text-center mt-6">
             <p className="text-white/80 text-sm">
-              Já tem uma conta?{' '}
+              Already have an account?{' '}
               <Link 
                 to="/login" 
                 className="text-white hover:text-white font-medium transition-colors"
               >
-                Faça login
+                Sign in
               </Link>
             </p>
           </div>

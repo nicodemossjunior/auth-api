@@ -21,7 +21,7 @@ const DashboardPage = () => {
       const data = await authService.getUserData();
       setUserData(data);
     } catch (err) {
-      setError('Erro ao buscar dados do usuário: ' + (err.message || 'Erro desconhecido'));
+      setError('Failed to fetch user data: ' + (err.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }
@@ -34,7 +34,7 @@ const DashboardPage = () => {
       const data = await authService.getAdminData();
       setAdminData(data);
     } catch (err) {
-      setError('Erro ao buscar dados de administrador: ' + (err.message || 'Acesso negado'));
+      setError('Failed to fetch admin data: ' + (err.message || 'Access denied'));
     } finally {
       setLoading(false);
     }
@@ -51,14 +51,14 @@ const DashboardPage = () => {
           <div>
             <h1 className="header-title">Dashboard</h1>
             <p className="text-white/80 text-sm">
-              Bem-vindo, {user?.firstName || 'Usuário'}!
+              Welcome, {user?.firstName || 'User'}!
             </p>
           </div>
           <Button 
             onClick={handleLogout}
             variant="outline"
           >
-            Sair
+            Sign out
           </Button>
         </div>
       </header>
@@ -72,13 +72,13 @@ const DashboardPage = () => {
               <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              Informações do Usuário
+              User Information
             </h3>
             
             {user && (
               <div className="space-y-4">
                 <div className="flex justify-between items-center py-2 border-b border-white/20">
-                  <span className="text-white/70 text-sm">Nome</span>
+                  <span className="text-white/70 text-sm">Name</span>
                   <span className="text-white font-medium">{user.firstName} {user.lastName}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-white/20">
@@ -99,7 +99,7 @@ const DashboardPage = () => {
               <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7m2 0V4l-9 9h7m-7-6v7m7-10v7" />
               </svg>
-              Ações da API
+              API Actions
             </h3>
             
             <div className="space-y-3">
@@ -109,7 +109,7 @@ const DashboardPage = () => {
                 disabled={loading}
                 className="btn-full"
               >
-                {loading ? 'Buscando...' : 'Buscar Dados do Usuário'}
+                {loading ? 'Fetching...' : 'Fetch User Data'}
               </Button>
               
               <Button
@@ -119,7 +119,7 @@ const DashboardPage = () => {
                 variant="outline"
                 className="btn-full"
               >
-                {loading ? 'Buscando...' : 'Buscar Dados de Admin'}
+                {loading ? 'Fetching...' : 'Fetch Admin Data'}
               </Button>
             </div>
           </div>
@@ -132,7 +132,7 @@ const DashboardPage = () => {
               <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.707.293L19.586 4.293A1 1 0 0118.879 4H14a2 2 0 00-2 2v3a2 2 0 002 2z" />
               </svg>
-              Resposta da API
+              API Response
             </h3>
             
             {error && (
@@ -146,7 +146,7 @@ const DashboardPage = () => {
             
             {userData && (
               <div className="alert alert-success mb-4">
-                <h4 className="font-semibold mb-2">✅ Dados do Usuário Recebidos:</h4>
+                <h4 className="font-semibold mb-2">User Data Received:</h4>
                 <div className="bg-black/20 rounded p-3 mt-2">
                   <pre className="text-xs text-green-800 whitespace-pre-wrap font-mono">
                     {JSON.stringify(userData, null, 2)}
@@ -157,7 +157,7 @@ const DashboardPage = () => {
             
             {adminData && (
               <div className="alert alert-success">
-                <h4 className="font-semibold mb-2">🔒 Dados de Admin Recebidos:</h4>
+                <h4 className="font-semibold mb-2">Admin Data Received:</h4>
                 <div className="bg-black/20 rounded p-3 mt-2">
                   <pre className="text-xs text-green-800 whitespace-pre-wrap font-mono">
                     {JSON.stringify(adminData, null, 2)}
