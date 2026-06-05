@@ -3,6 +3,7 @@ package com.mycompany.saas.service;
 import com.mycompany.saas.dto.AuthDto;
 import com.mycompany.saas.dto.TokenDto;
 import com.mycompany.saas.dto.UserDto;
+import com.mycompany.saas.exception.EmailAlreadyExistsException;
 import com.mycompany.saas.model.Role;
 import com.mycompany.saas.model.User;
 import com.mycompany.saas.repository.RoleRepository;
@@ -54,7 +55,7 @@ public class AuthService {
 
     public User register(UserDto userDto) {
         if (userRepository.existsByEmail(userDto.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new EmailAlreadyExistsException(userDto.getEmail());
         }
 
         Role userRole = roleRepository.findByName("ROLE_USER")
