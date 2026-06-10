@@ -1,229 +1,215 @@
-# JWT Authentication System Design
+# Design Proposal: JWT Authentication System
 
-This document describes the implemented design for a JWT-based authentication system with a Spring Boot backend, a React frontend, and PostgreSQL persistence.
+This document details the architecture for a complete authentication solution using a Spring Boot backend, a React frontend, and a PostgreSQL database. Authentication will be based on JSON Web Tokens (JWT).
 
 ## 1. Architecture Overview
 
-The application is organized into three main components:
+The solution will be divided into three main components:
 
-1. **Frontend (React)**: A single-page application that provides login, registration, and dashboard screens. It stores the JWT locally and sends it with requests to protected endpoints.
-2. **Backend (Spring Boot API)**: A REST API that exposes authentication endpoints, validates credentials, issues JWTs, validates incoming JWTs, and protects role-based endpoints.
-3. **Database (PostgreSQL)**: A relational database that stores users, password hashes, roles, and user-role assignments.
+1.  **Frontend (React)**: A Single-Page Application (SPA) responsible for the user interface. It will manage login and registration forms, store the JWT securely, and send it with each request to protected routes.
+2.  **Backend (Spring Boot API)**: A RESTful API that exposes endpoints for registration, authentication, and resource access. It will validate credentials, generate and validate JWTs, and protect endpoints.
+3.  **Database (PostgreSQL)**: A relational database for persisting user information, such as name, email, password (hash), and access roles.
 
-The runtime flow is:
+The basic communication flow will be:
 
-```text
-[React Frontend] <--- HTTP ---> [Spring Boot API] <--- JDBC ---> [PostgreSQL]
 ```
+[React Frontend] <--- (HTTP/S) ---> [Spring Boot API Backend] <--- (JDBC) ---> [PostgreSQL Database]
+```
+
+---
 
 ## 2. Technology Stack
 
-### Backend
+*   **Backend**:
+    *   Java 17+
+    *   Spring Boot 3.x
+    *   Spring Security 6.x
+    *   Spring Data JPA
+    *   Hibernate
+    *   JJWT (Java JWT library)
+    *   PostgreSQL Driver
+    *   Maven or Gradle (Dependency manager)
+*   **Frontend**:
+    *   React 18+
+    *   React Router DOM (for routing)
+    *   Axios (for HTTP requests)
+    *   Vite or Create React App (for project setup)
+*   **Database**:
+    *   PostgreSQL 14+
 
-- Java 21
-- Spring Boot 4.0.x
-- Spring Security
-- Spring Data JPA
-- Hibernate
-- JJWT
-- PostgreSQL JDBC driver
-- Maven
+---
 
-### Frontend
+## 3. Database Design (PostgreSQL)
 
-- React 18
-- React Router
-- Axios
-- Vite
-- Tailwind/PostCSS support with additional custom CSS
+We suggest a simple structure with two main tables to manage users and their roles, which gives us flexibility for access control (RBAC - Role-Based Access Control).
 
-### Database
+#### Table: `users`
 
-- PostgreSQL 14
-
-## 3. Database Design
-
-The backend uses a small RBAC-friendly schema with users, roles, and a many-to-many join table.
-
-### `users`
-
-Stores account identity and credential data.
+Stores the user's main information.
 
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
 | `id` | `BIGSERIAL` | `PRIMARY KEY` | Unique user identifier. |
-| `first_name` | `VARCHAR(100)` | `NOT NULL` | User first name. |
-| `last_name` | `VARCHAR(100)` | `NOT NULL` | User last name. |
-| `email` | `VARCHAR(255)` | `NOT NULL, UNIQUE` | User email, used as the login username. |
-| `password` | `VARCHAR(255)` | `NOT NULL` | BCrypt password hash. |
-| `created_at` | `TIMESTAMP` | `DEFAULT NOW()` | Creation timestamp. |
+| `first_name` | `VARCHAR(100)` | `NOT NULL` | User's first name. |
+| `last_name` | `VARCHAR(100)` | `NOT NULL` | User's last name. |
+| `email` | `VARCHAR(255)` | `NOT NULL, UNIQUE` | User email, used for login. |
+| `password` | `VARCHAR(255)` | `NOT NULL` | User password, stored as a hash (e.g., bcrypt). |
+| `created_at` | `TIMESTAMP` | `DEFAULT NOW()` | Record creation date and time. |
 
-### `roles`
+#### Table: `roles`
 
-Stores security roles.
-
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `INTEGER` | `PRIMARY KEY` | Unique role identifier. |
-| `name` | `VARCHAR(50)` | `NOT NULL, UNIQUE` | Role name, such as `ROLE_USER` or `ROLE_ADMIN`. |
-
-### `user_roles`
-
-Assigns roles to users.
+Stores the different roles or profiles a user can have.
 
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `user_id` | `BIGINT` | `FOREIGN KEY (users.id)` | User reference. |
-| `role_id` | `INTEGER` | `FOREIGN KEY (roles.id)` | Role reference. |
+| `id` | `INTEGER` | `PRIMARY KEY` | Unique role identifier (e.g., 1=ADMIN, 2=USER). |
+| `name` | `VARCHAR(50)` | `NOT NULL, UNIQUE`| Role name (e.g., 'ROLE_ADMIN', 'ROLE_USER'). |
 
-Default roles are initialized as `ROLE_USER` and `ROLE_ADMIN`. A default administrator is created at startup when no matching user exists:
+#### Junction Table: `user_roles`
 
-```text
-Email: admin@example.com
-Password: admin123
+Associates users with their respective roles (Many-to-Many relationship).
+
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `user_id` | `BIGINT` | `FOREIGN KEY (users.id)` | Foreign key to the `users` table. |
+| `role_id` | `INTEGER` | `FOREIGN KEY (roles.id)` | Foreign key to the `roles` table. |
+
+---
+
+## 4. Backend Design (Spring Boot API)
+
+The API will be structured into packages to separate responsibilities, following Spring best practices.
+
+#### Implemented Package Structure:
+
 ```
-
-## 4. Backend Design
-
-The backend package root is:
-
-```text
 com.mycompany.saas
+├── Application.java             // Spring Boot application entry point
+├── config/
+│   ├── SecurityConfig.java      // Spring Security configuration (filters, public/private routes)
+│   ├── WebConfig.java           // CORS configuration
+│   └── DataInitializer.java     // Seeds default roles and the development admin user
+├── controller/
+│   ├── AuthController.java      // Login and registration endpoints
+│   └── DataController.java      // Example endpoints for protected routes
+├── dto/
+│   ├── AuthDto.java             // DTO for login request (email, password)
+│   ├── UserDto.java             // DTO for registration request
+│   └── TokenDto.java            // DTO for response with the JWT
+├── model/
+│   ├── User.java                // JPA entity for the 'users' table
+│   └── Role.java                // JPA entity for the 'roles' table
+├── repository/
+│   ├── UserRepository.java      // Spring Data JPA Repository for User
+│   └── RoleRepository.java      // Spring Data JPA Repository for Role
+├── security/
+│   ├── TokenProvider.java       // Class to generate, validate, and extract JWT information
+│   └── JwtAuthFilter.java       // Filter that intercepts requests and validates the JWT
+├── exception/
+│   ├── EmailAlreadyExistsException.java // Domain exception for duplicate registrations
+│   └── GlobalExceptionHandler.java      // Centralized REST error responses
+└── service/
+    ├── AuthService.java         // Business logic for authentication and registration
+    └── CustomUserDetailsService.java // Implementation of Spring Security's UserDetailsService
 ```
 
-Current package responsibilities:
-
-```text
-com.mycompany.saas
-|-- config/
-|   |-- DataInitializer.java      // Default roles and administrator account
-|   |-- SecurityConfig.java       // Spring Security, JWT filter, CORS, public routes
-|   `-- WebConfig.java            // MVC CORS configuration
-|-- controller/
-|   |-- AuthController.java       // Login and registration endpoints
-|   `-- DataController.java       // Protected example endpoints
-|-- dto/
-|   |-- AuthDto.java              // Login request DTO
-|   |-- TokenDto.java             // JWT response DTO
-|   `-- UserDto.java              // Registration request DTO
-|-- exception/
-|   |-- EmailAlreadyExistsException.java
-|   `-- GlobalExceptionHandler.java
-|-- model/
-|   |-- Role.java
-|   `-- User.java
-|-- repository/
-|   |-- RoleRepository.java
-|   `-- UserRepository.java
-|-- security/
-|   |-- JwtAuthFilter.java
-|   `-- TokenProvider.java
-`-- service/
-    |-- AuthService.java
-    `-- CustomUserDetailsService.java
-```
-
-### API Endpoints
+#### API Endpoints:
 
 | Method | Route | Description | Authentication |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/register` | Registers a new user with `ROLE_USER`. | Public |
+| `POST` | `/api/auth/register` | Registers a new user. | Public |
 | `POST` | `/api/auth/login` | Authenticates a user and returns a JWT. | Public |
-| `GET` | `/api/data/user` | Returns protected user data. | Requires `ROLE_USER` or `ROLE_ADMIN` |
-| `GET` | `/api/data/admin` | Returns protected administrator data. | Requires `ROLE_ADMIN` |
+| `GET` | `/api/data/user` | Example route that returns data for any authenticated user. | Requires `ROLE_USER` or `ROLE_ADMIN` |
+| `GET` | `/api/data/admin` | Example route that returns data only for administrators. | Requires `ROLE_ADMIN` |
 
-### Authentication Flow
+#### Authentication Flow (JWT):
 
-1. The client sends `email` and `password` to `POST /api/auth/login`.
-2. `AuthService` delegates credential validation to Spring Security through `AuthenticationManager`.
-3. When credentials are valid, `TokenProvider` generates a signed JWT.
-4. The JWT uses the email as the subject and includes authorities in the `roles` claim.
-5. The client sends the token on protected requests as `Authorization: Bearer <token>`.
-6. `JwtAuthFilter` extracts and validates the token before controller execution.
-7. When the token is valid, the filter loads the user and populates `SecurityContextHolder`.
+1.  **Login**: The user sends `email` and `password` to `POST /api/auth/login`.
+2.  **Validation**: `AuthService` uses Spring Security's `AuthenticationManager` to validate the credentials. The submitted password is compared with the hash stored in the database.
+3.  **JWT Generation**: If the credentials are valid, `TokenProvider` generates a JWT.
+    *   **JWT Payload**: It will contain information such as `sub` (subject, user's email), `roles` (access roles), `iat` (issued at), and `exp` (expiration time).
+    *   **Signature**: The token will be signed with a secret key configured in `application.properties` to guarantee its integrity.
+4.  **Response**: The API returns the JWT to the client.
+5.  **Subsequent Requests**: The client (React) attaches the JWT to the `Authorization` header of each request to protected routes (e.g., `Authorization: Bearer <jwt>`).
+6.  **Security Filter**: `JwtAuthFilter` intercepts the request, extracts the token from the header, and validates its signature and expiration using `TokenProvider`.
+7.  **Authorization**: If the token is valid, the filter extracts the user information and configures Spring's `SecurityContextHolder`, allowing the request to proceed to the protected controller. If the token is invalid, the API returns a `401 Unauthorized` error.
 
-### Security and CORS
+#### Current Backend Implementation Notes:
 
-The security chain is stateless and CSRF is disabled because the API uses bearer tokens instead of server-side sessions. The following routes are public:
+*   **Application entry point**: The Spring Boot bootstrap class is `com.mycompany.saas.Application`.
+*   **Security mode**: The API is stateless (`SessionCreationPolicy.STATELESS`), disables CSRF for API usage, and installs `JwtAuthFilter` before `UsernamePasswordAuthenticationFilter`.
+*   **Public routes**: `/api/auth/**`, `/api/public/**`, `/error`, and all `OPTIONS` requests are permitted without authentication.
+*   **Method-level authorization**: `@EnableMethodSecurity(prePostEnabled = true)` is enabled so controllers can use `@PreAuthorize` for role checks.
+*   **CORS**: The backend allows credentialed requests from `http://localhost:3000` and `http://localhost:5173`, matching common React development ports.
+*   **Password hashing**: Passwords are encoded with `BCryptPasswordEncoder`.
+*   **JWT settings**: `app.jwt.secret` and `app.jwt.expiration-ms` are configured in `application.properties`; the current expiration is `86400000` ms (24 hours).
+*   **Default data**: `DataInitializer` creates `ROLE_USER`, `ROLE_ADMIN`, and a development admin user (`admin@example.com` / `admin123`) when they are missing.
+*   **Registration behavior**: New registered users receive `ROLE_USER` by default. Duplicate emails raise `EmailAlreadyExistsException`.
+*   **Error responses**: `GlobalExceptionHandler` returns structured JSON errors with `timestamp`, `status`, `error`, `message`, and `path`.
 
-- `/api/auth/**`
-- `/api/public/**`
-- `/error`
-- `OPTIONS` requests, including CORS preflight requests
+---
 
-CORS currently allows:
+## 5. Frontend Design (React)
 
-- `http://localhost:3000`
-- `http://localhost:5173`
+The frontend will be organized to be scalable and easy to maintain.
 
-### Error Handling
+#### Suggested Folder Structure:
 
-`GlobalExceptionHandler` returns structured JSON responses for known API errors. For example, duplicate registration emails return `409 Conflict`:
-
-```json
-{
-  "status": 409,
-  "error": "Conflict",
-  "message": "Email already exists: user@example.com",
-  "path": "/api/auth/register"
-}
 ```
-
-Unsupported HTTP methods return `405 Method Not Allowed` with a clear message.
-
-## 5. Frontend Design
-
-The React application provides public authentication pages and a protected dashboard route.
-
-```text
 src/
-|-- components/
-|   |-- Button.jsx
-|   |-- Input.jsx
-|   `-- PrivateRoute.jsx
-|-- context/
-|   `-- AuthContext.jsx
-|-- pages/
-|   |-- DashboardPage.jsx
-|   |-- LoginPage.jsx
-|   `-- RegisterPage.jsx
-|-- services/
-|   `-- authService.js
-|-- App.jsx
-|-- index.css
-`-- main.jsx
+├── components/         // Reusable components (Button, Input, etc.)
+├── pages/              // Page components (Login, Register, Dashboard)
+├── services/           // API communication logic (authService.js)
+├── context/            // React context for authentication state management
+├── hooks/              // Custom hooks (e.g., useAuth)
+├── utils/              // Utility functions
+└── App.js              // Main component with the routes
 ```
 
-### Routing and State
+#### Navigation and State Flow:
 
-- Public routes: `/login`, `/register`
-- Protected route: `/dashboard`
-- `PrivateRoute` redirects unauthenticated users to `/login`
-- `AuthContext` stores authentication state, current user data, loading state, and errors
-- The token is persisted in `localStorage`
+1.  **Routing**: `react-router-dom` will be used to manage routes.
+    *   **Public Routes**: `/login`, `/register`. Accessible to everyone.
+    *   **Private Routes**: `/dashboard`, `/profile`. Accessible only to authenticated users. A `PrivateRoute` component will check whether the user is logged in; otherwise, it will redirect to `/login`.
+2.  **Authentication State Management**:
+    *   An `AuthContext` will be created to provide authentication state (user, token, login status) to the whole application.
+    *   `AuthContext` will also expose functions such as `login(email, password)`, `register(...)`, and `logout()`.
+3.  **JWT Storage**: After a successful login, the JWT returned by the API will be stored in the browser's `localStorage` or `sessionStorage`.
+    *   `localStorage`: Persists the login across browser sessions.
+    *   `sessionStorage`: The login is lost when the tab is closed.
+4.  **API Communication**:
+    *   `axios` will be used for all HTTP calls.
+    *   An `axios` instance will be configured with an *interceptor*. This interceptor will automatically attach the `Authorization: Bearer <jwt>` header to all requests, reading the token from `localStorage`.
+    *   The interceptor can also handle `401 Unauthorized` errors (e.g., expired token), automatically logging the user out and redirecting them to the login page.
 
-### API Communication
+#### Main Components:
 
-`authService.js` creates an Axios instance with the API base URL `http://localhost:8080/api`. It attaches `Authorization: Bearer <token>` automatically when a token is present.
+*   **`LoginPage.js`**: Form with email and password fields. On submit, it calls the `AuthContext` `login` function.
+*   **`RegisterPage.js`**: Form with name, email, and password fields. On submit, it calls the `register` function.
+*   **`DashboardPage.js`**: Example protected page that fetches and displays API data (`/api/data/user`).
+*   **`App.js`**: Defines the application routes using `<Routes>` and `<Route>`, wrapping private routes with the `PrivateRoute` component.
+*   **`AuthProvider.js`**: Component that implements `AuthContext`, containing all authentication state logic.
 
-## 6. Operational Notes
+---
 
-The repository includes two Docker Compose files:
+## 6. Next Steps
 
-- `docker-compose.yml`: Runs PostgreSQL, backend, and frontend.
-- `docker-compose-backend-only.yml`: Runs PostgreSQL and backend only.
+With this design approved, implementation can start in the following order:
 
-The backend Dockerfile copies the built JAR from `auth-backend/target`, so the backend must be packaged before rebuilding the image:
-
-```bash
-cd auth-backend
-./mvnw package -DskipTests
-cd ..
-docker compose -f docker-compose-backend-only.yml up -d --build backend
-```
-
-## 7. Known Follow-Up Items
-
-- Avoid returning password hashes in registration responses by introducing a response DTO.
-- Align the registration response with the frontend authentication flow, either by returning a token after registration or by redirecting users to login.
-- Move JWT secrets and database passwords to environment-specific secret management for production.
+1.  **Environment Setup**: Install PostgreSQL, configure Java/Maven and Node.js/npm.
+2.  **Backend**:
+    *   Create the Spring Boot project.
+    *   Configure the database connection.
+    *   Implement the JPA entities (`User`, `Role`).
+    *   Implement the repositories, DTOs, and `TokenProvider`.
+    *   Configure `Spring Security` with the JWT filter.
+    *   Create the controllers and services for `register` and `login`.
+    *   Create the example protected endpoints.
+3.  **Frontend**:
+    *   Create the React project.
+    *   Structure the folders.
+    *   Implement `AuthContext` and `AuthProvider`.
+    *   Configure `axios` with the interceptor.
+    *   Create the `Login`, `Registration`, and `Dashboard` pages.
+    *   Configure routing with `react-router-dom`, including private routes.
+4.  **Testing and Refinement**: Test the complete flow, refine the UI/UX, and ensure error handling is robust.
